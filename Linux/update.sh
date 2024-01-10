@@ -1,3 +1,3 @@
-sudo apt-get update -y
-sudo apt-get upgrade -y
+sudo nala update
+sudo nala upgrade
 sudo apt-get dist-upgrade -y
