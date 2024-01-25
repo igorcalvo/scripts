@@ -1,7 +1,5 @@
-alias gedit='gnome-text-editor'
-
 screen -d -m pavucontrol
-screen -d -m youtube-music
+# screen -d -m youtube-music
 screen -d -m steam -silent
 screen -d -m discord
 
@@ -10,8 +8,8 @@ audio_process=$(pgrep pavucontrol)
 pacmd set-default-sink alsa_output.pci-0000_07_00.4.analog-stereo
 xdotool windowminimize `xdotool search --pid $audio_process | tail -1`
 
-yt_process=$(pgrep youtube-music | head -n1)
-xdotool windowminimize `xdotool search --pid $yt_process | tail -1`
+# yt_process=$(pgrep youtube-music | head -n1)
+# xdotool windowminimize `xdotool search --pid $yt_process | tail -1`
 
 sleep 5
 discord_process=$(pgrep Discord | head -n1)

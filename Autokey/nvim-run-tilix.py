@@ -1,0 +1,11 @@
+# Enter script code
+keyboard.press_key('<ctrl>')
+keyboard.fake_keypress('<tab>')
+keyboard.release_key('<ctrl>')
+keyboard.fake_keypress('<up>')
+keyboard.fake_keypress('<enter>')
+keyboard.press_key('<ctrl>')
+keyboard.press_key('<shift>')
+keyboard.fake_keypress('<tab>')
+keyboard.release_key('<shift>')
+keyboard.release_key('<ctrl>')
