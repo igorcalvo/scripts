@@ -1,1 +1,0 @@
-PowerShell.exe "& "'C:\Users\Igor\Documents\Projects\Coding\Scripts\wpp.ps1'" -WindowStyle hidden
