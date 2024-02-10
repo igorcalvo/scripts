@@ -3,6 +3,4 @@
 ^NumpadDiv::Send gj
 ^z::Send u
 ^+z::Send ^r
-!+f::Send nd{Enter}
-!j::Send mld
-!k::Send mlu
+
