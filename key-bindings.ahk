@@ -11,7 +11,7 @@
 ^ScrollLock::Run, bash -ic "systemctl reboot"
 CtrlBreak::Run, bash -ic "sh /home/calvo/Code/Scripts/shutdown.sh"
 
-+Ins::Run, bash -ic "xdotool key --clearmodifiers ctrl+shift+v"
+; +Ins::Run, bash -ic "xdotool key --clearmodifiers ctrl+shift+v"
 
 ^NumpadDiv::Send gj
 ; ^z::Send u
