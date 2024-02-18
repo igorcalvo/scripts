@@ -6,6 +6,7 @@
 #e::Run, bash -ic "xdg-open ."
 +#s::Run, bash -ic "/usr/bin/flameshot gui"
 ^!t::Run, bash -ic "sh /home/calvo/Code/Scripts/terminal.sh"
+^!n::Run, bash -ic "sh /home/calvo/Code/Scripts/neovim.sh"
 
 #l::Run, bash -ic "gnome-screensaver-command -l"
 ^ScrollLock::Run, bash -ic "systemctl reboot"
