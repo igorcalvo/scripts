@@ -1,7 +1,7 @@
 ; #l::Msgbox, test
 ^!f::Run, bash -ic "sh /home/calvo/Code/Scripts/cs_kill.sh"
-^!h::Run, bash -ic "sh /home/calvo/Code/Scripts/cs_in.sh"
-^!g::Run, bash -ic "sh /home/calvo/Code/Scripts/cs_out.sh"
+^!g::Run, bash -ic "sh /home/calvo/Code/Scripts/cs_in.sh"
+^!h::Run, bash -ic "sh /home/calvo/Code/Scripts/cs_out.sh"
 
 #e::Run, bash -ic "xdg-open ."
 +#s::Run, bash -ic "/usr/bin/flameshot gui"
