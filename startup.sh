@@ -21,10 +21,9 @@ xdotool windowminimize $discord_window
 tlx=$(pgrep tilix)
 tlx=$(xdotool search --pid $tlx | tail -1)
 sleep 1
-xdotool set_desktop_for_window $tlx 0
 xdotool windowsize $tlx 33% 100%
-xdotool windowmove $tlx 0 0
-xdotool mousemove 940 45
+xdotool windowmove $tlx 3840 0
+xdotool mousemove 4780 45
 xdotool click --repeat 2 1
 
 exit
