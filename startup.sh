@@ -3,7 +3,7 @@ screen -d -m pavucontrol
 screen -d -m steam -silent
 screen -d -m discord
 screen -d -m autokey
-screen -d -m /home/calvo/.local/bin/ahk_x11.AppImage /home/calvo/Code/Scripts/key-bindings.ahk
+screen -d -m /home/calvo/.local/bin/ahk_x11.AppImage /home/calvo/code/scripts/key-bindings.ahk
 screen -d -m tilix
 
 sleep 2
