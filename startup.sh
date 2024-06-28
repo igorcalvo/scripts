@@ -5,6 +5,10 @@ screen -d -m discord
 screen -d -m ahk_x11 /home/calvo/code/scripts/key-bindings.ahk
 screen -d -m tilix
 
+sleep 1
+xdotool mousemove 2800 500
+xdotool click --repeat 1 1
+
 sleep 2
 yt=$(pgrep youtube-music | head -n1)
 yt=$(xdotool search --pid $yt | tail -1)
