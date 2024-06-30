@@ -17,9 +17,13 @@ polybar &
 # nitrogen ~/images/wallpapers/2024-06/pc/wallpaper5.png --set-auto
 nitrogen --restore &
 
-bspwm
-
 xinput --set-prop 8 'libinput Accel Profile Enabled' 0, 1
+xrdb ~/.Xresources
+xsetroot -cursor_name left_ptr
+polychromatic-tray-applet &
 
-screen -d -m ahk_x11 /home/calvo/code/scripts/key-bindings-wm.ahk
+clipcatd
 
+ahk_x11 /home/calvo/code/scripts/key-bindings-wm.ahk &
+
+bspwm
