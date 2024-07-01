@@ -1,3 +1,4 @@
+source ~/.bashrc
 sh ~/code/scripts/cs-out.sh
 
 picom &
@@ -13,17 +14,17 @@ polybar &
     # MONITOR=$m polybar &
     # MONITOR=$m polybar --reload example &
 # done
-      
+
 # nitrogen ~/images/wallpapers/2024-06/pc/wallpaper5.png --set-auto
 nitrogen --restore &
 
 xinput --set-prop 8 'libinput Accel Profile Enabled' 0, 1
 xrdb ~/.Xresources
 xsetroot -cursor_name left_ptr
-polychromatic-tray-applet &
-
-clipcatd
+numlockx &
 
 ahk_x11 /home/calvo/code/scripts/key-bindings-wm.ahk &
+screen -d -m polychromatic-tray-applet    
+clipcatd
 
 bspwm
