@@ -1,37 +1,43 @@
-# screen -d -m pavucontrol
-screen -d -m youtube-music
+source ~/.bashrc
+sh ~/code/scripts/cs-out.sh
+
+picom &
+
+sxhkd &
+
+unclutter --timeout 5 --jitter 3 --start-hidden &
+
+dunst &
+
+polybar &
+# for m in $(polybar --list-monitors | cut -d":" -f1); do
+    # MONITOR=$m polybar &
+    # MONITOR=$m polybar --reload example &
+# done
+
+# nitrogen ~/images/wallpapers/2024-06/pc/wallpaper5.png --set-auto
+nitrogen --restore &
+
+xinput --set-prop 8 'libinput Accel Profile Enabled' 0, 1
+xinput --set-prop 8 'libinput Accel Speed' -0.333
+xrdb ~/.Xresources
+xsetroot -cursor_name left_ptr
+
+setxkbmap -option caps:super
+numlockx &
+
+ahk_x11 /home/calvo/code/scripts/key-bindings.ahk &
+screen -d -m polychromatic-tray-applet
+clipcatd
+
 screen -d -m steam -silent
-screen -d -m discord
-screen -d -m ahk_x11 /home/calvo/code/scripts/key-bindings.ahk
-screen -d -m tilix
+screen -d -m discord --start-minimized
 
-sleep 1
-xdotool mousemove 2800 500
-xdotool click --repeat 1 1
+# screen -d -m youtube-music
+# yt=$(pgrep youtube-music | head -n1)
+# yt=$(xdotool search --pid $yt | tail -1)
+# xdotool windowclose $yt
+#
+screen -d -m python hourly.py
 
-sleep 2
-yt=$(pgrep youtube-music | head -n1)
-yt=$(xdotool search --pid $yt | tail -1)
-xdotool windowsize $yt 33% 100%
-xdotool windowmove $yt 0 0
-xdotool mousemove 1000 15
-xdotool click --repeat 2 1
-xdotool windowminimize $yt 
-
-sleep 5
-disc=$(xdotool search --name Friends | tail -1)
-xdotool windowsize $disc 33% 100%
-xdotool windowmove $disc 0 0
-xdotool click --repeat 2 1
-xdotool windowminimize $disc
-
-sleep 1
-tlx=$(pgrep tilix)
-tlx=$(xdotool search --pid $tlx | tail -1)
-xdotool windowsize $tlx 33% 100%
-xdotool windowmove $tlx 3840 0
-xdotool mousemove 4780 45
-xdotool click --repeat 2 1
-
-exit
-
+bspwm
