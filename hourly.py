@@ -21,7 +21,7 @@ while True:
         first_run = False
         os.system(f"sh {script_path} +")
 
-    if hour > 22 and late_at_night:
+    if hour < 6 and late_at_night:
         late_at_night = False
         os.system(f"sh {script_path} +")
     
