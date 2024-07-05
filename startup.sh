@@ -4,6 +4,7 @@ screen -d -m tilix
 screen -d -m steam -silent
 screen -d -m youtube-music
 # screen -d -m discord --start-minimized
+screen -d -m discord 
 screen -d -m python ~/code/scripts/hourly.py
 
 # youtube-music

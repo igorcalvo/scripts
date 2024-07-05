@@ -24,5 +24,7 @@ while True:
     if hour < 6 and late_at_night:
         late_at_night = False
         os.system(f"sh {script_path} +")
+        time.sleep(1)
+        os.system(f"sh {script_path} +")
     
     time.sleep(one_hour)
