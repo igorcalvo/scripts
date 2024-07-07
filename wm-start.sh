@@ -26,6 +26,5 @@ ahk_x11 ~/code/scripts/key-bindings.ahk &
 screen -d -m polychromatic-tray-applet
 clipcatd
 
-screen -d -m python ~/code/scripts/startup.py
-
+screen -d -m sh ~/code/scripts/startup.sh
 bspwm
