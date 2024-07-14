@@ -11,7 +11,6 @@ polybar &
     # MONITOR=$m polybar --reload example &
 # done
 
-# nitrogen ~/images/wallpapers/2024-06/pc/wallpaper5.png --set-auto
 nitrogen --restore &
 
 unclutter --timeout 3 --jitter 5 --start-hidden &
