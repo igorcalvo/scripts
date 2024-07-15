@@ -1,0 +1,6 @@
+; #l::Msgbox, test
+
+^NumpadDiv::Send gj
+; Numpad2::Send {NumpadPgDn}
+; Numpad3::Send {NumpadLeft}
+
