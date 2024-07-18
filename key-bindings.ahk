@@ -1,7 +1,7 @@
-#l::Msgbox, test
+; l::Msgbox, test
+; ^~m::Reload
 
-^~m::Reload
 ^NumpadDiv::Send gj
-;NumpadDown::Send {NumpadPgDn}
-;NumpadPgDn::Send {NumpadLeft}
+; Numpad3::Send 4
+; Numpad2::Send 3
 
