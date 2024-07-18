@@ -1,6 +1,7 @@
-; #l::Msgbox, test
+#l::Msgbox, test
 
+^~m::Reload
 ^NumpadDiv::Send gj
-; Numpad2::Send {NumpadPgDn}
-; Numpad3::Send {NumpadLeft}
+;NumpadDown::Send {NumpadPgDn}
+;NumpadPgDn::Send {NumpadLeft}
 
