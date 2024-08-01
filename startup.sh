@@ -12,10 +12,9 @@ screen -d -m wezterm start -- cava
 screen -d -m youtube-music
 # screen -d -m discord # --start-minimized
 
-sleep 3 
+sleep 5
 playerctl play-pause
 # bspc desktop -f 'R2'
 # bspc node @parent -R 180
 
-sleep 2
 bspc desktop -f 'C1'
