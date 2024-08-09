@@ -5,6 +5,7 @@ screen -d -m tilix
 
 bspc desktop -f 'L3'
 screen -d -m wezterm start -- ~/code/scripts/tasks.sh
+screen -d -m wezterm start -- python ~/code/memory/main.py
 
 sleep 1
 bspc desktop -f 'R3'
