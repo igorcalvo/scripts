@@ -5,7 +5,7 @@ cat ~/code/scripts/key-bindings.ahk | sed "s/; N/N/;w /home/calvo/code/scripts/k
 
 screen -d -m ahk_x11 ~/code/scripts/key-bindings.ahk
 anki &
-sleep 1
+sleep 2
 
 notify-send "NUMPAD" "Remapping 2 and 3"
 

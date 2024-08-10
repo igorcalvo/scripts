@@ -12,8 +12,7 @@ polybar &
 nitrogen --restore &
 
 unclutter --timeout 3 --jitter 5 --start-hidden &
-xinput --set-prop 8 'libinput Accel Profile Enabled' 0, 1
-xinput --set-prop 8 'libinput Accel Speed' -0.333
+sh ~/code/scripts/reset-mouse.sh
 xrdb ~/.Xresources
 xsetroot -cursor_name left_ptr
 screen -d -m polychromatic-tray-applet
