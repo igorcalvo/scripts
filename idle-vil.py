@@ -1,5 +1,5 @@
 import time, os, sys
 
 while True:
-    time.sleep(3)
+    time.sleep(5)
     cmd = os.popen("xdotool click 2")
