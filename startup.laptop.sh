@@ -1,2 +1,3 @@
-screen -d -m ahk_x11 "/home/calvo/code/scripts/key-bindings.ahk"
+screen -d -m wezterm start -- ~/code/scripts/tasks.sh
+bspc desktop -f 'C1'
 exit
