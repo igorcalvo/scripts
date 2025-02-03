@@ -1,3 +1,5 @@
+# must be run at ~/code/linux/dotfiles/
+
 platform=laptop
 base=/home/calvo/
 paths=(
