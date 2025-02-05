@@ -10,6 +10,8 @@ polybar &
     # MONITOR=$m polybar --reload example &
 # done
 nitrogen --restore &
+# needed for VM
+lxqt-policykit-agent &
 
 unclutter --timeout 3 --jitter 5 --start-hidden &
 sh ~/code/scripts/reset-mouse.laptop.sh
