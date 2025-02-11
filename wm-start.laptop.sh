@@ -14,7 +14,7 @@ nitrogen --restore &
 lxqt-policykit-agent &
 
 unclutter --timeout 3 --jitter 5 --start-hidden &
-sh ~/code/scripts/reset-mouse.laptop.sh
+screen -d -m sh ~/code/scripts/reset-mouse.laptop.sh
 # sources cursor
 xrdb ~/.Xresources
 xsetroot -cursor_name left_ptr
