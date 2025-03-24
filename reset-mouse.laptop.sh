@@ -7,3 +7,5 @@ xinput --set-prop ${id1} 'libinput Accel Speed' -0.5
 xinput --set-prop ${id2} 'libinput Accel Profile Enabled' 0, 1
 xinput --set-prop ${id2} 'libinput Accel Speed' -0.5
 
+polychromatic-cli -n "Razer DeathAdder Essential" --dpi 500
+
