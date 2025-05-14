@@ -1,3 +1,6 @@
+xset -dpms
+# prevents screens from sleeping
+#
 sleep 1
 bspc desktop -f 'L3'
 
