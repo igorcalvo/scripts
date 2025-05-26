@@ -1,6 +1,6 @@
 #!/bin/bash
 emoji=$(awk '/^### DATA ###$/ {found=1; next} found' "$0" | \
-  fuzzel --dmenu | cut -d ' ' -f1 | tr -d '\n')
+  wofi --dmenu --gtk-dark | cut -d ' ' -f1 | tr -d '\n')
 
 wl-copy "${emoji}"
 
