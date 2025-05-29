@@ -1,2 +1,3 @@
-vol_value=$(pactl get-sink-volume $(pactl get-default-sink) | awk -F '/' '/1/ {print $2}' | sed 's/ //g' | sed 's/%//')
-notify-send " $vol_value %" "" -t 250 --icon=audio-headphones --app-name="Volume"
+default_sink_id=$(wpctl status | awk '/\*/ { sub(/\./, "", $3); print $3 }' | head -n 1)
+vol_value=$(wpctl get-volume $default_sink_id | sed "s/Volume: 0.//")
+notify-send " $vol_value %" "" -t 250 -i ~/images/icons/volume.png -u low -a volume

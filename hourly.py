@@ -4,9 +4,11 @@ import os
 import sys
 
 one_hour = 3600
-script_path = "~/.config/polybar/nightlight.sh"
+day_command = "hyprctl hyprsunset identity"
+nt1_command = "hyprctl hyprsunset temperature 5000"
+nt2_command = "hyprctl hyprsunset temperature 4000"
 
-first_run = True
+
 late_at_night = True
 
 def cs2_is_running() -> bool:
@@ -18,18 +20,14 @@ while True:
     hour = datetime.datetime.now().hour
 
     if hour < 18 and not hour < 7:
-        os.system(f"sh {script_path} -")
-        time.sleep(1)
-        os.system(f"sh {script_path} -")
+        os.system(day_command)
 
-    if hour >= 18 and first_run and not cs2_is_running():
+    if hour >= 18 and not cs2_is_running():
         first_run = False
-        os.system(f"sh {script_path} +")
+        os.system(nt1_command)
 
     if hour < 6 and late_at_night and not cs2_is_running():
         late_at_night = False
-        os.system(f"sh {script_path} +")
-        time.sleep(1)
-        os.system(f"sh {script_path} +")
+        os.system(nt2_command)
     
     time.sleep(one_hour)
