@@ -8,7 +8,6 @@ day_command = "hyprctl hyprsunset identity"
 nt1_command = "hyprctl hyprsunset temperature 5000"
 nt2_command = "hyprctl hyprsunset temperature 4000"
 
-
 late_at_night = True
 
 def cs2_is_running() -> bool:
@@ -23,7 +22,6 @@ while True:
         os.system(day_command)
 
     if hour >= 18 and not cs2_is_running():
-        first_run = False
         os.system(nt1_command)
 
     if hour < 6 and late_at_night and not cs2_is_running():
