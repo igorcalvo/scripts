@@ -8,7 +8,7 @@ hyprctl dispatch workspace 7;
 sleep 0.25
 screen -d -m kitty btop
 sleep 0.25
-screen -d -m kitty cava
+screen -d -m wezterm start -- nvim ~/todo.txt
 sleep 0.25
 screen -d -m youtube-music
 
