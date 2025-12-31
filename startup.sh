@@ -1,4 +1,6 @@
 sleep 0.25
+hyprctl hyprpaper wallpaper "HDMI-A-1, /home/calvo/images/wallpapers/2025-06/l.png"
+hyprctl hyprpaper wallpaper "DP-1, /home/calvo/images/wallpapers/2025-06/r.png"
 hyprctl dispatch workspace 1;
 sleep 0.125
 screen -d -m librewolf --new-tab --url moz-extension://75a0cd2e-e8e3-4f74-8a2e-186cec1622ac/index.html
