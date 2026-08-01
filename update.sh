@@ -131,9 +131,9 @@ if (( ${#repo_pkgs[@]} > 0 )); then
     fi
     age=$((now - build))
     if is_blacklisted "$name"; then
-      skip_black+=("$name ($(fmt_age "$age"))")
+      skip_black+=("$name (${C_OK}$(fmt_age "$age")${C_OFF})")
     elif (( age < MIN_AGE_SECONDS )); then
-      skip_new+=("$name ($(fmt_age "$age"))")
+      skip_new+=("$name (${C_OK}$(fmt_age "$age")${C_OFF})")
     else
       to_update+=("$name")
       to_show+=("$name $version (${C_OK}$(fmt_age "$age")${C_OFF})")
@@ -169,9 +169,9 @@ for line in "${aur_lines[@]:-}"; do
   fi
 
   if is_blacklisted "$name"; then
-    skip_black+=("$name ($(fmt_age $((hours * 3600))))")
+    skip_black+=("$name (${C_OK}$(fmt_age $((hours * 3600)))${C_OFF})")
   elif (( hours < MIN_AGE_HOURS )); then
-    skip_new+=("$name ($(fmt_age $((hours * 3600))))")
+    skip_new+=("$name (${C_OK}$(fmt_age $((hours * 3600)))${C_OFF})")
   else
     to_update+=("$name")
     to_show+=("$name $new (${C_OK}$(fmt_age $((hours * 3600)))${C_OFF})")
@@ -181,20 +181,24 @@ done
 # ─────────────────────────── 4. Summary + command ─────────────────────────
 echo
 echo "${C_HDR}==> [4/4] Summary${C_OFF}"
-echo "  Eligible (>= ${MIN_AGE_DAYS}d old, not blacklisted):"
-if (( ${#to_show[@]} > 0 )); then
-  printf '    %s\n' "${to_show[@]}"
-else
-  echo "    ${C_DIM}none${C_OFF}"
+if (( ${#BLACKLIST[@]} > 0 )); then
+  echo "  ${C_WARN}Blacklist keys (${#BLACKLIST[@]}):${C_OFF} $(join_capped 20 "${BLACKLIST[@]}")"
 fi
 if (( ${#skip_black[@]} > 0 )); then
   echo "  ${C_WARN}Skipped (blacklisted):${C_OFF} $(join_capped 8 "${skip_black[@]}")"
 fi
 if (( ${#skip_new[@]} > 0 )); then
-  echo "  ${C_WARN}Skipped (younger than ${MIN_AGE_DAYS}d):${C_OFF} $(join_capped 8 "${skip_new[@]}")"
+  echo "  ${C_WARN}Skipped (younger than ${MIN_AGE_DAYS}d):${C_OFF}"
+  printf '    %s\n' "${skip_new[@]}"
 fi
 if (( ${#skip_other[@]} > 0 )); then
   echo "  ${C_WARN}Skipped (unparsable):${C_OFF} $(join_capped 8 "${skip_other[@]}")"
+fi
+echo "  ${C_WARN}Eligible (>= ${MIN_AGE_DAYS}d old, not blacklisted):${C_OFF}"
+if (( ${#to_show[@]} > 0 )); then
+  printf '    %s\n' "${to_show[@]}"
+else
+  echo "    ${C_DIM}none${C_OFF}"
 fi
 
 if (( ${#to_update[@]} == 0 )); then
