@@ -11,7 +11,9 @@
 #   3. keeps only packages that pass BOTH filters:
 #        - name does not match any BLACKLIST glob (e.g. 'haskell*')
 #        - new version is at least MIN_AGE_DAYS days old
-#   4. prints the exact command `yay -S <only those packages>` and asks
+#   4. drops any candidate whose install would force a package that the
+#      filters left behind to move anyway (see "Dependency guard" below)
+#   5. prints the exact command `yay -S <only those packages>` and asks
 #      before running it
 #
 # Usage:
@@ -27,10 +29,14 @@
 # MIN_AGE_DAYS stay on their old version until they mature. If you ever want
 # a full system upgrade instead, run `yay -Syu`.
 #
+# Anything that survives the filters still has to be installable *alone*.
+# Step 4 removes candidates that would break or silently bypass the age
+# filter, instead of letting pacman abort the whole transaction on them.
+#
 # The AUR age bracket (`[1d2h]` etc.) is yay's "age of the new version":
 # the time since the AUR package was last modified (yay's FormatAgeTag).
 #
-# Dependencies: yay, pacman, expac (from the `expac` package).
+# Dependencies: yay, pacman (incl. vercmp), expac (from the `expac` package).
 
 set -euo pipefail
 
@@ -52,7 +58,10 @@ Filter-aware Arch Linux package updater (yay):
   2. list available repo + AUR updates with the age of each new version
   3. keep only packages whose new version is >= MIN_AGE_DAYS days old
      and whose name does not match a BLACKLIST glob (e.g. haskell*)
-  4. print the exact `yay -S <pkgs>` command and ask before running it
+  4. drop candidates that would force a filtered-out package to change:
+     a dependency of the new version that is not installed and not being
+     updated, or a kept package that pins the old version of a candidate
+  5. print the exact `yay -S <pkgs>` command and ask before running it
 
 Options:
   -y, --yes   run the generated yay command without asking
@@ -65,7 +74,7 @@ esac
 MIN_AGE_SECONDS=$((MIN_AGE_DAYS * 86400))
 MIN_AGE_HOURS=$((MIN_AGE_DAYS * 24))
 
-for cmd in yay pacman expac; do
+for cmd in yay pacman vercmp expac; do
   command -v "$cmd" >/dev/null 2>&1 || {
     echo "error: required command '$cmd' not found in PATH" >&2
     exit 1
@@ -110,11 +119,11 @@ fi
 now=$(date +%s)
 
 # ─────────────────────────── 1. Refresh ───────────────────────────────────
-echo "${C_HDR}==> [1/4] Refreshing package databases (yay -Sy) ...${C_OFF}"
+echo "${C_HDR}==> [1/5] Refreshing package databases (yay -Sy) ...${C_OFF}"
 yay -Sy
 
 # ─────────────────────────── 2. Repo packages ─────────────────────────────
-echo "${C_HDR}==> [2/4] Checking official repo updates ...${C_OFF}"
+echo "${C_HDR}==> [2/5] Checking official repo updates ...${C_OFF}"
 mapfile -t repo_pkgs < <(pacman -Qu -n | awk '{print $1}')
 
 to_update=()
@@ -144,7 +153,7 @@ else
 fi
 
 # ─────────────────────────── 3. AUR packages ──────────────────────────────
-echo "${C_HDR}==> [3/4] Checking AUR updates ...${C_OFF}"
+echo "${C_HDR}==> [3/5] Checking AUR updates ...${C_OFF}"
 mapfile -t aur_lines < <(yay -Qua)
 
 for line in "${aur_lines[@]:-}"; do
@@ -178,9 +187,152 @@ for line in "${aur_lines[@]:-}"; do
   fi
 done
 
-# ─────────────────────────── 4. Summary + command ─────────────────────────
+# ─────────────────────── 4. Dependency guard ──────────────────────────────
+# The age filter leaves packages behind, so a candidate can be uninstallable
+# even though it passed the filter. Two rules run to a fixpoint and drop such
+# candidates instead of letting pacman abort the whole transaction:
+#
+#   A. the candidate's new version needs something that is not installed and
+#      that nothing in this run will provide. Either the provider is being
+#      held back (poppler was too young for inkscape's new soname), or the
+#      dependency does not exist yet. A brand-new dependency is left alone:
+#      pacman installs it fresh, and there is no older version to respect.
+#   B. a package we keep at its current version pins, by exact version or by
+#      shared-library soname, something a candidate stops providing
+#      (poppler-glib pins poppler=26.08.0). Upgrading that candidate would
+#      break the kept package, so the candidate goes too.
+#
+# Dropping one package can make another uninstallable, hence the loop.
+#
+# Cost: one expac dump plus an index of every name/version/provides token on
+# the system (~1.5s on a ~1500 package install), paid once per run.
+
+declare -A inst_ver=() inst_deps=() inst_prov=()
+while IFS='|' read -r n v d p; do
+  inst_ver[$n]=$v; inst_deps[$n]=$d; inst_prov[$n]=$p
+done < <(expac -Q '%n|%v|%D|%P')
+
+declare -A new_ver=() new_deps=() new_prov=()
+if (( ${#repo_pkgs[@]} > 0 )); then
+  while IFS='|' read -r n v d p; do
+    new_ver[$n]=$v; new_deps[$n]=$d; new_prov[$n]=$p
+  done < <(expac -S '%n|%v|%D|%P' "${repo_pkgs[@]}" 2>/dev/null || true)
+fi
+
+# A dependency token is a plain name, a version pin (`foo=1.2`, `foo>=1.2`) or
+# a soname (`libfoo.so=3-64`). Packages satisfy them through their name and
+# their provides list; pins may be spelled with or without pkgrel, so both
+# spellings are indexed.
+pkg_tokens() {              # $1 = name, $2 = version, $3 = provides
+  local name=$1 ver=$2 provides=$3 t
+  printf '%s\n%s=%s\n%s=%s\n' "$name" "$name" "$ver" "$name" "${ver%-*}"
+  for t in $provides; do printf '%s\n' "$t"; done
+}
+
+declare -A tok_inst=() tok_new=() soname_owner=()
+for n in "${!inst_ver[@]}"; do
+  while read -r t; do tok_inst[$t]+=" $n"; done \
+    < <(pkg_tokens "$n" "${inst_ver[$n]}" "${inst_prov[$n]}")
+  for t in ${inst_prov[$n]}; do
+    if [[ $t =~ ^(.+\.so)= ]]; then soname_owner[${BASH_REMATCH[1]}]=$n; fi
+  done
+done
+for n in "${!new_ver[@]}"; do
+  while read -r t; do tok_new[$t]+=" $n"; done \
+    < <(pkg_tokens "$n" "${new_ver[$n]}" "${new_prov[$n]}")
+done
+
+satisfied_installed() {     # $1 = dependency token; true if today's system has it
+  local t=$1 base op ver rc
+  [[ -n ${tok_inst[$t]:-} ]] && return 0
+  [[ $t =~ ^([^=<>]+)(\>=|\<=|\>|\<)(.+)$ ]] || return 1
+  base=${BASH_REMATCH[1]} op=${BASH_REMATCH[2]} ver=${BASH_REMATCH[3]}
+  [[ -n ${inst_ver[$base]:-} ]] || return 1
+  rc=$(vercmp "${inst_ver[$base]}" "$ver")
+  case $op in
+    '>')  [[ $rc -gt 0 ]] ;;
+    '>=') [[ $rc -ge 0 ]] ;;
+    '<')  [[ $rc -lt 0 ]] ;;
+    '<=') [[ $rc -le 0 ]] ;;
+    *)    return 1 ;;
+  esac
+}
+
+declare -A candidate=() excluded=()
+if (( ${#to_update[@]} > 0 )); then
+  for p in "${to_update[@]}"; do candidate[$p]=1; done
+fi
+
+# Dependency tokens are word-split all over this section; disable pathname
+# expansion so a token can never be mistaken for a glob.
+set -f
+rounds=0
+while :; do
+  rounds=$((rounds + 1))
+  changed=0
+
+  # B: every package we keep must still find what it pins
+  for h in "${!inst_ver[@]}"; do
+    [[ -n ${candidate[$h]:-} ]] && continue
+    for t in ${inst_deps[$h]:-}; do
+      [[ -n ${tok_inst[$t]:-} ]] || continue
+      kept_provider=0       # another package still provides it -> nothing to do
+      for p in ${tok_inst[$t]}; do
+        [[ -z ${candidate[$p]:-} ]] && kept_provider=1
+      done
+      (( kept_provider )) && continue
+      for p in ${tok_inst[$t]}; do
+        [[ -n ${candidate[$p]:-} ]] || continue
+        [[ " ${tok_new[$t]:-} " == *" $p "* ]] && continue
+        unset "candidate[$p]"
+        excluded[$p]="kept package $h still needs $t"
+        changed=1
+      done
+    done
+  done
+
+  # A: every candidate must install without upgrading a kept package
+  for c in "${!candidate[@]}"; do
+    for t in ${new_deps[$c]:-${inst_deps[$c]:-}}; do
+      satisfied_installed "$t" && continue
+      available=0           # will another candidate of this run provide it?
+      for p in ${tok_new[$t]:-}; do
+        [[ -n ${candidate[$p]:-} ]] && available=1
+      done
+      (( available )) && continue
+      base=${t%%=*}
+      if [[ $base == *.so ]]; then provider=${soname_owner[$base]:-}; else provider=$base; fi
+      [[ -n ${inst_ver[$provider]:-} ]] || continue   # brand-new dependency
+      unset "candidate[$c]"
+      excluded[$c]="needs $t, which $provider only provides once it is updated"
+      changed=1
+      break
+    done
+  done
+
+  (( changed )) || break
+  (( rounds > 100 )) && break     # safety net: each round drops at least one package
+done
+set +f
+
+if (( ${#excluded[@]} > 0 )); then
+  kept_update=() kept_show=()
+  for i in "${!to_update[@]}"; do
+    p=${to_update[$i]}
+    [[ -n ${excluded[$p]:-} ]] && continue
+    kept_update+=("$p")
+    kept_show+=("${to_show[$i]}")
+  done
+  to_update=(); to_show=()
+  if (( ${#kept_update[@]} > 0 )); then
+    to_update=("${kept_update[@]}")
+    to_show=("${kept_show[@]}")
+  fi
+fi
+
+# ─────────────────────────── 5. Summary + command ─────────────────────────
 echo
-echo "${C_HDR}==> [4/4] Summary${C_OFF}"
+echo "${C_HDR}==> [5/5] Summary${C_OFF}"
 if (( ${#BLACKLIST[@]} > 0 )); then
   echo "  ${C_WARN}Blacklist keys (${#BLACKLIST[@]}):${C_OFF} $(join_capped 20 "${BLACKLIST[@]}")"
 fi
@@ -193,6 +345,13 @@ if (( ${#skip_new[@]} > 0 )); then
 fi
 if (( ${#skip_other[@]} > 0 )); then
   echo "  ${C_WARN}Skipped (unparsable):${C_OFF} $(join_capped 8 "${skip_other[@]}")"
+fi
+if (( ${#excluded[@]} > 0 )); then
+  echo "  ${C_WARN}Excluded (dependency not updated in this run):${C_OFF}"
+  mapfile -t _excl_names < <(printf '%s\n' "${!excluded[@]}" | sort)
+  for p in "${_excl_names[@]}"; do
+    echo "    $p (${excluded[$p]})"
+  done
 fi
 echo "  ${C_WARN}Eligible (>= ${MIN_AGE_DAYS}d old, not blacklisted):${C_OFF}"
 if (( ${#to_show[@]} > 0 )); then
